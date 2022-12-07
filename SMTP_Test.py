@@ -14,6 +14,8 @@ sg.theme('LightBrown1')
 layout = [[sg.Text("Server Name:", font=('Times New Roman', 12), size=(20, 1)), sg.Input()],
           [sg.Text("Port:", font=('Times New Roman', 12), size=(20, 1)), sg.Input()],
           [sg.Text("Email:", font=('Times New Roman', 12), size=(20, 1)), sg.Input()],
+          [sg.Text("Username:", font=('Times New Roman', 12), size=(20, 1)),
+          sg.Input("", s=(45, 1), disabled=False, k="-USR-")],
           [sg.T("Password:", font=('Times New Roman', 12), size=(20, 1)),
           sg.Input("", s=(45, 1), disabled=False, k="-PASS-")],
           [sg.Text("Recipient Email:", font=('Times New Roman', 12), size=(20, 1)), sg.Input()],
@@ -40,9 +42,11 @@ while True:
         window['-OUTPUT-']('')
 
     if values['-NOAUTH-'] == True:
+        window['-USR-'].Update(visible = False)
         window['-PASS-'].Update(visible = False)
 
     if values['-NOAUTH-'] == False:
+        window['-USR-'].Update(visible = True)
         window['-PASS-'].Update(visible = True)
 
     if values[5] != "":
@@ -56,7 +60,7 @@ while True:
                     # Make MSG ID
                     ID = make_msgid()
 
-                    msg = MIMEText(values[5])
+                    msg = MIMEText(values[4])
 
                     # me = Sender Address, you = Recipient Address
                     me = values[2]
@@ -77,6 +81,7 @@ while True:
 
                     # Message contents with port and app password
                     message = "Subject: " + values[4] + "\n" + "\n" + values[5]
+                    usrname = values['-USR-']
                     app_password = values['-PASS-']
 
                     context = ssl.create_default_context()
@@ -85,7 +90,7 @@ while True:
                     if values[1] == '465':
                         # SSL Command
                         with smtplib.SMTP_SSL(values[0], 465, context=context) as server:
-                            server.login(values[2], app_password)
+                            server.login(usrname, app_password)
                             server.sendmail(values[2], values[3], message)
 
                     # If Port = 587
@@ -93,7 +98,7 @@ while True:
                         # STARTTLS
                         with smtplib.SMTP(values[0], 587) as server:
                             server.starttls(context=context)  # Secure connection with TLS
-                            server.login(values[2], app_password)
+                            server.login(usrname, app_password)
                             server.sendmail(values[2], values[3], message)
 
 
@@ -115,4 +120,5 @@ while True:
 
 # Finish up by removing from the screen
 window.close()
+
 
